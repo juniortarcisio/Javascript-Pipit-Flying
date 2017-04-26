@@ -159,8 +159,8 @@ Game.prototype.draw = function (c) {
 
 function Player() {
     this.pos = new Object();
-    this.pos.x = new Number((game.canvas.width/2 - 150));
-    this.pos.y = new Number(150);
+    this.pos.x = new Number((game.canvas.width/2 +200));
+    this.pos.y = new Number(450);
 
     this.frames = [];
     this.frames[0] = new Image;
@@ -190,24 +190,64 @@ function Player() {
 
 
 Player.prototype.update = function () {
+    //if (this.pos.y < game.canvas.height - this.img.height)
+    //    this.velocity.y = this.velocity.y + this.velocity.acceleration*5;
+	
+	var accelMultiplier = 2.5;
+	if (game.rotationAux < 90)  {
+		//valor maximo - rotacao, qnd for o maximo n tem mais gravidade, tira % e usa como fator
+		var factor = ((90- game.rotationAux)/90);
+		this.velocity.y = this.velocity.y + this.velocity.acceleration*(accelMultiplier*factor);
+	}		
+	else if(game.rotationAux > 270) {
+		var aux = Math.abs(game.rotationAux - 360);
+		var factor = ((90- aux)/90);
+		this.velocity.y = this.velocity.y + this.velocity.acceleration*(accelMultiplier*factor);
+	}
+	
+	if (game.rotationAux >= 90 && game.rotationAux <= 270)
+	{
+		if (game.rotationAux < 180)  {
+			var aux = Math.abs(game.rotationAux - 90);
+			var factor = (aux/90);
+			this.velocity.y = this.velocity.y - this.velocity.acceleration*(accelMultiplier*factor);
+		}		
+		else if(game.rotationAux >= 180) {
+			var aux = Math.abs(270 - game.rotationAux );
+			var factor = (aux/90);
+			this.velocity.y = this.velocity.y - this.velocity.acceleration*(accelMultiplier*factor);
+		}
+	}
+	
+	//x axis 
+	if (game.rotationAux < 180) {
 
-    if (game.keys[40] && this.velocity.y < this.velocity.maxspeed)
-        this.velocity.y = this.velocity.y + this.velocity.acceleration;
-
-    if (game.keys[39] && this.velocity.x < this.velocity.maxspeed)
-        this.velocity.x = this.velocity.x + this.velocity.acceleration;
-
-    if (game.keys[37] && this.velocity.x > -this.velocity.maxspeed)
-        this.velocity.x = this.velocity.x - this.velocity.acceleration;
-
-
-    if (game.keys[38] && this.pos.y >= game.canvas.height - this.img.height) {
-        this.velocity.y = this.velocity.y - this.velocity.acceleration*100;
-        sounds[0].play();
-    }
-
-    if (this.pos.y < game.canvas.height - this.img.height)
-        this.velocity.y = this.velocity.y + this.velocity.acceleration*5;
+		if (game.rotationAux < 90)  {
+			var factor = (game.rotationAux/90);
+			this.velocity.x = this.velocity.x - this.velocity.acceleration*(accelMultiplier*factor);
+		}		
+		else if(game.rotationAux >= 90) {
+			var aux = Math.abs(180 - game.rotationAux );
+			var factor = (aux/90);
+			this.velocity.x = this.velocity.x - this.velocity.acceleration*(accelMultiplier*factor);
+		}
+	}
+	else {
+		
+		//270 -> max point
+		//180-270 
+		if (game.rotationAux < 270)  {
+			var aux = Math.abs(game.rotationAux-180);
+			var factor = (aux/90);
+			this.velocity.x = this.velocity.x + this.velocity.acceleration*(accelMultiplier*factor);
+		}		
+		else if(game.rotationAux >= 270) {
+			var aux = Math.abs(360 - game.rotationAux );
+			var factor = (aux/90);
+			this.velocity.x = this.velocity.x + this.velocity.acceleration*(accelMultiplier*factor);
+		}
+	}
+		
 
     // apply friction
     this.velocity.y *= this.velocity.friction - 0.05;
@@ -257,7 +297,8 @@ Player.prototype.update = function () {
 }
 
 Player.prototype.draw = function () {
-    game.ctx.drawImage(this.img, this.pos.x, this.pos.y);
+    //game.ctx.drawImage(this.img, this.pos.x, this.pos.y);
+	drawRotatedImage(this.img, this.pos.x, this.pos.y, game.rotationAux);
 }
 
 
@@ -311,5 +352,6 @@ MagicEffect.prototype.update = function () {
 
 MagicEffect.prototype.draw = function () {
     if (typeof this.img != "undefined")
-        game.ctx.drawImage(this.img, this.pos.x, this.pos.y);
+        //game.ctx.drawImage(this.img, this.pos.x, this.pos.y);	
+		drawRotatedImage(this.img, this.pos.x, this.pos.y, game.rotationAux);
 }
